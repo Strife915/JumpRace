@@ -1,29 +1,93 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public Joystick joystick;
-    public Rigidbody myRigidBody;
-    public float speed;
-    public float jump;
+    [SerializeField] Joystick myJoyStick;
+    [SerializeField] Rigidbody myRigidBody;
+    [SerializeField] Animator myAnimator;
 
-    // Start is called before the first frame update
-    
-    private void FixedUpdate()
+    private void Start()
     {
-        Vector3 direction = Vector3.forward * joystick.Vertical + Vector3.right * joystick.Horizontal;
-        myRigidBody.AddForce(direction * speed * Time.fixedDeltaTime,ForceMode.VelocityChange);
-
+        myAnimator = GetComponent<Animator>();
     }
-    private void OnCollisionEnter(Collision collision)
+
+    [SerializeField] float speed;
+    [SerializeField] float jump;
+    [SerializeField] float rotationSpeed;
+    [SerializeField] bool dragging = false;
+
+    
+    void Update()
     {
-        if(collision.gameObject.tag=="JumpPad")
+        
+        DraggingUpdater();
+        BlendTreeController();
+    }
+
+    void FixedUpdate()
+    {
+        MouseInput();
+        if (dragging)
         {
-            Debug.Log("1");
-            myRigidBody.AddForce(Vector3.up * jump * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            collision.gameObject.SendMessage("JumpPadColorUpdate");
+            float y = Input.GetAxis("Mouse X") * rotationSpeed * Time.fixedDeltaTime;
+            transform.Rotate(new Vector3(0, y, 0));
+        }
+        
+    }
+    
+    void MouseInput()
+    {
+        if(Input.GetMouseButton(0))
+        {
+            dragging = true;
+            Move();
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("JumpPad"))
+        {
+            myRigidBody.AddForce(Vector3.up * jump * Time.fixedDeltaTime, ForceMode.VelocityChange);
+            collision.gameObject.SendMessage("JumpPadColorUpdate");
+            myAnimator.SetBool("Roll", true);
+            LevelManager.instance.IncreaseLevelScore(10);
+        }
+        else if(collision.gameObject.CompareTag("FinishZone"))
+        {
+            Debug.Log("Level Complete");
+        }
+        else if(collision.gameObject.CompareTag("DeadZone"))
+        {
+            Debug.Log("Player died");
+        }
+    }
+
+    private void Move()
+    {
+        
+            myRigidBody.MovePosition(myRigidBody.position + (transform.forward * speed * Time.deltaTime));   
+    }
+
+    void DraggingUpdater()
+    {
+        if (Input.GetMouseButtonUp(0))
+        {
+            dragging = false;
+        }
+    }
+
+    public void RollAnimationUpdate()
+    {
+        myAnimator.SetBool("Roll", false);
+    }
+
+    public void BlendTreeController()
+    {
+        myAnimator.SetFloat("yVelocity", myRigidBody.velocity.y);
+    }
+
 }

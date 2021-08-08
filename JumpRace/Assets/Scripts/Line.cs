@@ -25,7 +25,6 @@ public class Line : MonoBehaviour
         for(int i=0; i < jumpPads.Length; i++)
         {
             myLine.SetPosition(i, jumpPads[i].position);
-            Debug.Log("2");
         }
     }
 

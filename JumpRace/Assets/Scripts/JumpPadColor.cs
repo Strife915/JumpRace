@@ -1,33 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class JumpPadColor : MonoBehaviour
 {
+    [SerializeField] Transform jumpPadTransform;
+
     [SerializeField] int touchCounter;
-    private Renderer myRenderer;
+    [SerializeField] float animDuration;
 
-    private void Awake()
+    Renderer myRenderer;
+
+    private void Start()
     {
-        myRenderer = GetComponent<Renderer>();
+        jumpPadTransform = gameObject.transform;
+        //myRenderer = GetComponent<Renderer>();
     }
-
-    // Start is called before the first frame update
-    public void JumpPadColorUpdate()
+    //public void JumpPadColorUpdate()
+    //{
+    //    touchCounter++;
+    //    switch(touchCounter)
+    //    {
+    //        case 1:
+    //            myRenderer.material.color = Color.yellow;
+    //            JumpPadAnimation();
+    //            break;
+    //        case 2:
+    //            myRenderer.material.color = Color.red;
+    //            JumpPadAnimation();
+    //            break;
+    //        case 3:
+    //            Destroy(gameObject);
+    //            JumpPadAnimation();
+    //            break;   
+    //    }
+    //}
+    public void JumpPadAnimation()
     {
-        touchCounter++;
-        switch(touchCounter)
-        {
-            case 1:
-                myRenderer.material.color = Color.yellow;
-                break;
-            case 2:
-                myRenderer.material.color = Color.red;
-                break;
-            case 3:
-                Destroy(gameObject);
-                break;
-                
-        }
+        jumpPadTransform.DOShakePosition(animDuration, 0.5f, 50, 150, false, true);
     }
 }

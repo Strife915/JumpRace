@@ -5,71 +5,115 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] Joystick myJoyStick;
+    enum State { Transcending, Dying, Alive};
+    State state = State.Alive;
+
     [SerializeField] Rigidbody myRigidBody;
     [SerializeField] Animator myAnimator;
+    [SerializeField] LaserSight myLaserSight;
+    [SerializeField] BoxCollider myBoxCollider;
+    [SerializeField] ParticleSystem perfectParticle;
+
+
+    [SerializeField] float speed;
+    [SerializeField] float jump;
+    [SerializeField] float longJump;
+    [SerializeField] float rotationSpeed;
+    [SerializeField] bool dragging = false;
 
     private void Start()
     {
         myAnimator = GetComponent<Animator>();
     }
-
-    [SerializeField] float speed;
-    [SerializeField] float jump;
-    [SerializeField] float rotationSpeed;
-    [SerializeField] bool dragging = false;
-
     
     void Update()
     {
-        
-        DraggingUpdater();
-        BlendTreeController();
+        if(state == State.Alive)
+        {
+            Move();
+            DraggingUpdater();
+            BlendTreeController();
+        }       
     }
 
-    void FixedUpdate()
-    {
-        MouseInput();
-        if (dragging)
-        {
-            float y = Input.GetAxis("Mouse X") * rotationSpeed * Time.fixedDeltaTime;
-            transform.Rotate(new Vector3(0, y, 0));
-        }
-        
-    }
     
-    void MouseInput()
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        GameObject other = collision.gameObject;
+        switch(other.tag)
+        {
+            case "JumpPad":
+                if(other.GetComponent<JumpPad>().ReturnIsExplored())
+                {
+                    Debug.Log("Normal Jump");
+                    JumpProcess(other,jump);
+                    other.SendMessage("JumpPadAnimation");
+                    myAnimator.SetBool("Roll", true);
+                }
+                else
+                {
+                    Debug.Log("Normal Jump");
+                    JumpProcess(other,jump);
+                    myAnimator.SetBool("Roll", true);
+                    LevelManager.instance.IncreaseLevelScore(10);
+                    other.SendMessage("IsExploredUpdate");
+                    other.SendMessage("JumpPadAnimation");
+                }
+                break;
+            case "PerfectZone":
+                JumpProcess(other, jump);
+                myAnimator.SetBool("Roll", true);
+                LevelManager.instance.IncreaseLevelScore(10);
+                UiManager.instance.PopPerfectText();
+                other.SendMessage("IsExploredUpdate");
+                other.SendMessage("JumpPadAnimation");
+                perfectParticle.Play();
+                Debug.Log("Perfect Zone");
+                break;
+            case "FinishZone":
+                StartSuccesSequence();
+                break;
+            default:
+                StartDeathSequence();
+                break;
+        }
+    }
+    void Move()
     {
         if(Input.GetMouseButton(0))
         {
             dragging = true;
-            Move();
+            transform.position += transform.forward * speed * Time.deltaTime;
+            if (dragging)
+            {
+                float y = Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
+                transform.Rotate(new Vector3(0, y, 0));
+            }
         }
-    }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("JumpPad"))
-        {
-            myRigidBody.AddForce(Vector3.up * jump * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            collision.gameObject.SendMessage("JumpPadColorUpdate");
-            myAnimator.SetBool("Roll", true);
-            LevelManager.instance.IncreaseLevelScore(10);
-        }
-        else if(collision.gameObject.CompareTag("FinishZone"))
-        {
-            Debug.Log("Level Complete");
-        }
-        else if(collision.gameObject.CompareTag("DeadZone"))
-        {
-            Debug.Log("Player died");
-        }
     }
-
-    private void Move()
+    void JumpProcess(GameObject other,float jump)
     {
-        
-            myRigidBody.MovePosition(myRigidBody.position + (transform.forward * speed * Time.deltaTime));   
+        //transform.position += transform.up * jump * Time.deltaTime;
+        myRigidBody.AddForce(Vector3.up * jump * Time.deltaTime,ForceMode.VelocityChange);
+    }
+    void StartDeathSequence()
+    {
+        Debug.Log("Player Dead");
+        UiManager.instance.PopDeathScreen();
+        state = State.Dying;
+        myLaserSight.myLaser.enabled = false;
+    }
+    void StartSuccesSequence()
+    {
+        LevelManager.instance.IncreaseLevelScore(100);
+        state = State.Transcending;
+        UiManager.instance.PopSuccesScreen();
+        myAnimator.SetTrigger("Succes");
+        myLaserSight.myLaser.enabled = false;
+        Debug.Log("Level Complete");
     }
 
     void DraggingUpdater()
@@ -79,15 +123,16 @@ public class PlayerMovement : MonoBehaviour
             dragging = false;
         }
     }
-
-    public void RollAnimationUpdate()
+    void RollAnimationUpdate()
     {
         myAnimator.SetBool("Roll", false);
     }
-
-    public void BlendTreeController()
+    void BlendTreeController()
     {
         myAnimator.SetFloat("yVelocity", myRigidBody.velocity.y);
     }
+
+
+
 
 }

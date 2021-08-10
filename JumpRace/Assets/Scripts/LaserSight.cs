@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class LaserSight : MonoBehaviour
 {
-    //[SerializeField] GameObject myLaser;
 
-     LineRenderer myLaser;
+
+     public LineRenderer myLaser;
 
     
 
@@ -19,7 +19,6 @@ public class LaserSight : MonoBehaviour
     private void Update()
     {
         LaserUpdate();
-
     }
 
     private void LaserUpdate()
@@ -32,6 +31,12 @@ public class LaserSight : MonoBehaviour
                 myLaser.SetPosition(1, new Vector3(0, -hit.distance, 0));
                 myLaser.startColor = Color.green;
                 myLaser.endColor = Color.green;
+            }
+            else if(hit.collider.CompareTag("PerfectZone"))
+            {
+                myLaser.SetPosition(1, new Vector3(0, -hit.distance, 0));
+                myLaser.startColor = Color.yellow;
+                myLaser.endColor = Color.yellow;
             }
             else
             {

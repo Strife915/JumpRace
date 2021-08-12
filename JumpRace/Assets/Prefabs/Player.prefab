@@ -89,6 +89,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06bf090766280b444a3975c8f5ab7068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myLaser: {fileID: 0}
 --- !u!120 &7223418048409581018
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -267,13 +268,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e5898ce85e9114895ccb90cf302e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myJoyStick: {fileID: 0}
   myRigidBody: {fileID: 7223418049541246432}
   myAnimator: {fileID: 0}
+  myLaserSight: {fileID: 0}
+  myBoxCollider: {fileID: 0}
+  perfectParticle: {fileID: 0}
   speed: 5
-  jump: 500
+  jump: 700
+  longJump: 0
   rotationSpeed: 500
   dragging: 0
+  isJumping: 0
 --- !u!95 &7223418049541246435
 Animator:
   serializedVersion: 3

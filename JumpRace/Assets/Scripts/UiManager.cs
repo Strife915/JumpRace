@@ -12,6 +12,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] GameObject deathScreen;
     [SerializeField] GameObject succesScreen;
     [SerializeField] GameObject perfectText;
+    [SerializeField] GameObject longJumpText;
 
     private void Awake()
     {
@@ -25,19 +26,35 @@ public class UiManager : MonoBehaviour
     {
         deathScreen.SetActive(true);
     }
+    public void CloseDeathScreen()
+    {
+        deathScreen.SetActive(false);
+    }
     public void PopSuccesScreen()
     {
         succesScreen.SetActive(true);
+    }
+    public void CLoseSuccesScreen()
+    {
+        succesScreen.SetActive(false);
     }
 
     public void PopPerfectText()
     {
         perfectText.SetActive(true);
     }
-    public void ClosePerfectText()
-    {
-        perfectText.SetActive(false);
-    }
+    //public void ClosePerfectText()
+    //{
+    //    perfectText.SetActive(false);
+    //}
     
+    public void PopLongJumpText()
+    {
+        longJumpText.SetActive(true);
+    }
+    //public void CloseLongJumpText()
+    //{
+    //    longJumpText.SetActive(false);
+    //}
     
 }

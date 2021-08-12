@@ -9,19 +9,17 @@ public class Line : MonoBehaviour
 
     [SerializeField] Transform[] jumpPads;
     // Start is called before the first frame update
-    private void Awake()
-    {
-        myLine = GetComponent<LineRenderer>();
-    }
+    
     private void Start()
     {
-        //Debug.Log(jumpPads.Length.ToString() + " Length");
+        myLine = GetComponent<LineRenderer>();
         CreateAllLines();
     }
 
     private void CreateAllLines()
     {
-        myLine.GetComponent<LineRenderer>().positionCount = jumpPads.Length;
+        //myLine.GetComponent<LineRenderer>().positionCount = jumpPads.Length;
+        myLine.positionCount = jumpPads.Length;
         for(int i=0; i < jumpPads.Length; i++)
         {
             myLine.SetPosition(i, jumpPads[i].position);

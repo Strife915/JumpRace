@@ -10,7 +10,7 @@ public class LaserSight : MonoBehaviour
 
     
 
-    private void Awake()
+    private void Start()
     {
         myLaser = GetComponent<LineRenderer>();
         
@@ -26,7 +26,7 @@ public class LaserSight : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit))
         {
-            if (hit.collider.CompareTag("JumpPad") || hit.collider.CompareTag("FinishZone"))
+            if (hit.collider.CompareTag("JumpPad") || hit.collider.CompareTag("FinishZone") || hit.collider.CompareTag("LongJump")) 
             {
                 myLaser.SetPosition(1, new Vector3(0, -hit.distance, 0));
                 myLaser.startColor = Color.green;

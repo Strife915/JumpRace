@@ -8,6 +8,7 @@ TagManager:
   - DeadZone
   - FinishZone
   - PerfectZone
+  - LongJump
   layers:
   - Default
   - TransparentFX

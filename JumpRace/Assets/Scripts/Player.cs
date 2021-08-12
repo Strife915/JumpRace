@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class Player : Actor
 {
     enum State { Transcending, Dying, Alive};
     State state = State.Alive;
@@ -14,16 +14,17 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] BoxCollider myBoxCollider;
     [SerializeField] ParticleSystem perfectParticle;
 
-
     [SerializeField] float speed;
     [SerializeField] float jump;
     [SerializeField] float longJump;
     [SerializeField] float rotationSpeed;
     [SerializeField] bool dragging = false;
+    [SerializeField] bool isJumping;
 
     private void Start()
     {
         myAnimator = GetComponent<Animator>();
+        myBoxCollider = GetComponent<BoxCollider>();
     }
     
     void Update()
@@ -47,30 +48,37 @@ public class PlayerMovement : MonoBehaviour
             case "JumpPad":
                 if(other.GetComponent<JumpPad>().ReturnIsExplored())
                 {
-                    Debug.Log("Normal Jump");
                     JumpProcess(other,jump);
                     other.SendMessage("JumpPadAnimation");
-                    myAnimator.SetBool("Roll", true);
                 }
                 else
                 {
-                    Debug.Log("Normal Jump");
                     JumpProcess(other,jump);
-                    myAnimator.SetBool("Roll", true);
                     LevelManager.instance.IncreaseLevelScore(10);
                     other.SendMessage("IsExploredUpdate");
                     other.SendMessage("JumpPadAnimation");
                 }
                 break;
             case "PerfectZone":
-                JumpProcess(other, jump);
-                myAnimator.SetBool("Roll", true);
-                LevelManager.instance.IncreaseLevelScore(10);
-                UiManager.instance.PopPerfectText();
+                if(other.GetComponent<JumpPad>().ReturnIsExplored())
+                {
+                    JumpProcess(other, jump);
+                }
+                else
+                {
+                    JumpProcess(other, jump);
+                    LevelManager.instance.IncreaseLevelScore(20);
+                    UiManager.instance.PopPerfectText();
+                    other.SendMessage("IsExploredUpdate");
+                    perfectParticle.Play();   
+                }
+                break;
+
+            case "LongJump":
+                JumpProcess(other, 2500);
+                UiManager.instance.PopLongJumpText();
                 other.SendMessage("IsExploredUpdate");
-                other.SendMessage("JumpPadAnimation");
-                perfectParticle.Play();
-                Debug.Log("Perfect Zone");
+
                 break;
             case "FinishZone":
                 StartSuccesSequence();
@@ -82,7 +90,7 @@ public class PlayerMovement : MonoBehaviour
     }
     void Move()
     {
-        if(Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
             dragging = true;
             transform.position += transform.forward * speed * Time.deltaTime;
@@ -96,8 +104,12 @@ public class PlayerMovement : MonoBehaviour
     }
     void JumpProcess(GameObject other,float jump)
     {
-        //transform.position += transform.up * jump * Time.deltaTime;
+        if (isJumping) return;
+        myAnimator.SetBool("Roll", true);
+        isJumping = true;
+        Debug.Log("Player zýpladý");
         myRigidBody.AddForce(Vector3.up * jump * Time.deltaTime,ForceMode.VelocityChange);
+        ColliderUpdater();
     }
     void StartDeathSequence()
     {
@@ -109,6 +121,7 @@ public class PlayerMovement : MonoBehaviour
     void StartSuccesSequence()
     {
         LevelManager.instance.IncreaseLevelScore(100);
+        LevelManager.instance.IncreaseLevelIndex();
         state = State.Transcending;
         UiManager.instance.PopSuccesScreen();
         myAnimator.SetTrigger("Succes");
@@ -123,14 +136,31 @@ public class PlayerMovement : MonoBehaviour
             dragging = false;
         }
     }
-    void RollAnimationUpdate()
-    {
-        myAnimator.SetBool("Roll", false);
-    }
     void BlendTreeController()
     {
         myAnimator.SetFloat("yVelocity", myRigidBody.velocity.y);
     }
+    
+    void ColliderUpdater()
+    {
+        if(myBoxCollider.enabled)
+        {
+            myBoxCollider.enabled = false;
+        }
+        else
+        {
+            myBoxCollider.enabled = true;
+        }
+    }
+    void RollAnimationUpdate()
+    {
+        myAnimator.SetBool("Roll", false);
+    }
+    void JumpUpdater()
+    {
+        isJumping = false;
+    }
+
 
 
 

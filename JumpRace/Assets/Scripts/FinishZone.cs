@@ -14,7 +14,6 @@ public class FinishZone : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("1");
             frontLeft.Play();
             frontRight.Play();
             backLeft.Play();

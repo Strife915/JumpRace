@@ -3484,7 +3484,14 @@ AnimationClip:
   - time: 0.33333334
     functionName: RollAnimationUpdate
     data: 
-    objectReferenceParameter: {fileID: 2100000, guid: 59e4faf24927edf4a82f463ad16f1c37, type: 2}
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.33333334
+    functionName: ColliderUpdater
+    data: 
+    objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

@@ -47,3 +47,6 @@ MonoBehaviour:
   deathScreen: {fileID: 0}
   succesScreen: {fileID: 0}
   perfectText: {fileID: 0}
+  longJumpText: {fileID: 0}
+  currentLevelNumber: {fileID: 0}
+  nextLevelNumber: {fileID: 0}

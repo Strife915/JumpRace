@@ -13,6 +13,9 @@ public class UiManager : MonoBehaviour
     [SerializeField] GameObject succesScreen;
     [SerializeField] GameObject perfectText;
     [SerializeField] GameObject longJumpText;
+    [SerializeField] TextMeshProUGUI currentLevelNumber;
+    [SerializeField] TextMeshProUGUI nextLevelNumber;
+
 
     private void Awake()
     {
@@ -21,7 +24,20 @@ public class UiManager : MonoBehaviour
         else if (instance != this)
             Destroy(gameObject);
     }
-    
+    private void Start()
+    {
+        currentLevelNumber.text = LevelLoader.instance.ReturnLevelIndex()+1.ToString();
+        nextLevelNumber.text = LevelLoader.instance.ReturnLevelIndex()+2.ToString();
+    }
+    private void Update()
+    {
+        TutorialTextUpdater();
+        if(GameManager.instance.state == GameManager.gameState.isOverbyAi)
+        {
+            PopDeathScreen();
+        }
+    }
+
     public void PopDeathScreen()
     {
         deathScreen.SetActive(true);
@@ -43,18 +59,23 @@ public class UiManager : MonoBehaviour
     {
         perfectText.SetActive(true);
     }
-    //public void ClosePerfectText()
-    //{
-    //    perfectText.SetActive(false);
-    //}
-    
     public void PopLongJumpText()
     {
         longJumpText.SetActive(true);
     }
-    //public void CloseLongJumpText()
-    //{
-    //    longJumpText.SetActive(false);
-    //}
+    public void TutorialTextUpdater()
+    {
+        if(GameManager.instance.state== GameManager.gameState.Onhold)
+        {
+            tutorialText.SetActive(true);
+        }
+        else
+        {
+            tutorialText.SetActive(false);
+        }
+    }
+    
+    
+    
     
 }

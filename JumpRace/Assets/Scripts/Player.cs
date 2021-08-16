@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : Actor
+public class Player : MonoBehaviour
 {
-    enum State { Transcending, Dying, Alive};
+    enum State { Transcending, Dying, Alive };
     State state = State.Alive;
 
     [SerializeField] Rigidbody myRigidBody;
@@ -13,6 +13,8 @@ public class Player : Actor
     [SerializeField] LaserSight myLaserSight;
     [SerializeField] BoxCollider myBoxCollider;
     [SerializeField] ParticleSystem perfectParticle;
+    [SerializeField] ScoreBoard myScoreBoard;
+    [SerializeField] GameObject crown;
 
     [SerializeField] float speed;
     [SerializeField] float jump;
@@ -21,64 +23,79 @@ public class Player : Actor
     [SerializeField] bool dragging = false;
     [SerializeField] bool isJumping;
 
+
+
+    
     private void Start()
     {
         myAnimator = GetComponent<Animator>();
         myBoxCollider = GetComponent<BoxCollider>();
+        myScoreBoard = FindObjectOfType<ScoreBoard>();
+
     }
-    
+
     void Update()
-    {
-        if(state == State.Alive)
+    {  
+        if (state == State.Alive && GameManager.instance.state == GameManager.gameState.Onhold || GameManager.instance.state == GameManager.gameState.isPlaying)
         {
             Move();
             DraggingUpdater();
             BlendTreeController();
-        }       
-    }
+            Crown();
+        }
 
-    
+    }
 
 
     private void OnCollisionEnter(Collision collision)
-    {
+    {        
         GameObject other = collision.gameObject;
-        switch(other.tag)
+        switch (other.tag)
         {
             case "JumpPad":
-                if(other.GetComponent<JumpPad>().ReturnIsExplored())
+                if (other.GetComponent<JumpPad>().ReturnIsExplored())
                 {
-                    JumpProcess(other,jump);
+                    Jump(other, jump);
                     other.SendMessage("JumpPadAnimation");
                 }
                 else
                 {
-                    JumpProcess(other,jump);
+                    Jump(other, jump);
                     LevelManager.instance.IncreaseLevelScore(10);
+                    GetComponent<Actor>().IncreasePoint(10);
                     other.SendMessage("IsExploredUpdate");
                     other.SendMessage("JumpPadAnimation");
                 }
                 break;
             case "PerfectZone":
-                if(other.GetComponent<JumpPad>().ReturnIsExplored())
+                if (other.GetComponent<JumpPad>().ReturnIsExplored())
                 {
-                    JumpProcess(other, jump);
+                    Jump(other, jump);
                 }
                 else
                 {
-                    JumpProcess(other, jump);
+                    Jump(other, jump);
                     LevelManager.instance.IncreaseLevelScore(20);
+                    GetComponent<Actor>().IncreasePoint(20);
                     UiManager.instance.PopPerfectText();
                     other.SendMessage("IsExploredUpdate");
-                    perfectParticle.Play();   
+                    perfectParticle.Play();
                 }
                 break;
 
             case "LongJump":
-                JumpProcess(other, 2500);
-                UiManager.instance.PopLongJumpText();
-                other.SendMessage("IsExploredUpdate");
-
+                if(other.GetComponent<JumpPad>().ReturnIsExplored())
+                {
+                    Jump(other, longJump);
+                }
+                else
+                {
+                    Jump(other, 2500);
+                    UiManager.instance.PopLongJumpText();
+                    LevelManager.instance.IncreaseLevelScore(50);
+                    GetComponent<Actor>().IncreasePoint(50);
+                    other.SendMessage("IsExploredUpdate");
+                }
                 break;
             case "FinishZone":
                 StartSuccesSequence();
@@ -92,6 +109,7 @@ public class Player : Actor
     {
         if (Input.GetMouseButton(0))
         {
+            GameManager.instance.state = GameManager.gameState.isPlaying;
             dragging = true;
             transform.position += transform.forward * speed * Time.deltaTime;
             if (dragging)
@@ -100,32 +118,51 @@ public class Player : Actor
                 transform.Rotate(new Vector3(0, y, 0));
             }
         }
-
     }
-    void JumpProcess(GameObject other,float jump)
+    void Jump(GameObject other, float jump)
     {
         if (isJumping) return;
         myAnimator.SetBool("Roll", true);
         isJumping = true;
-        Debug.Log("Player zýpladý");
-        myRigidBody.AddForce(Vector3.up * jump * Time.deltaTime,ForceMode.VelocityChange);
+        myRigidBody.AddForce(Vector3.up * jump * Time.deltaTime, ForceMode.VelocityChange);
         ColliderUpdater();
+    }
+    private void Crown()
+    {
+        if (myScoreBoard.ReturnFirstPlace())
+        {
+            crown.SetActive(true);
+        }
+        else if (!myScoreBoard.ReturnFirstPlace())
+        {
+            crown.SetActive(false);
+        }
     }
     void StartDeathSequence()
     {
         Debug.Log("Player Dead");
         UiManager.instance.PopDeathScreen();
+        GameManager.instance.state = GameManager.gameState.isOver;
         state = State.Dying;
-        myLaserSight.myLaser.enabled = false;
+        myLaserSight.myLaser.enabled = false;   
     }
     void StartSuccesSequence()
     {
-        LevelManager.instance.IncreaseLevelScore(100);
-        LevelManager.instance.IncreaseLevelIndex();
+        LevelManager.instance.IncreaseLevelScore(150);
+        GetComponent<Actor>().IncreasePoint(250);
+        LevelLoader.instance.IncreaseLevelIndex();
         state = State.Transcending;
-        UiManager.instance.PopSuccesScreen();
         myAnimator.SetTrigger("Succes");
         myLaserSight.myLaser.enabled = false;
+        if (myScoreBoard.ReturnFirstPlace())
+        {
+            UiManager.instance.PopSuccesScreen();
+        }
+        else if(!myScoreBoard.ReturnFirstPlace())
+        {
+            UiManager.instance.PopDeathScreen();
+        }
+        GameManager.instance.state = GameManager.gameState.isOver;
         Debug.Log("Level Complete");
     }
 
@@ -140,10 +177,10 @@ public class Player : Actor
     {
         myAnimator.SetFloat("yVelocity", myRigidBody.velocity.y);
     }
-    
+
     void ColliderUpdater()
     {
-        if(myBoxCollider.enabled)
+        if (myBoxCollider.enabled)
         {
             myBoxCollider.enabled = false;
         }

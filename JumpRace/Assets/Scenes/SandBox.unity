@@ -640,6 +640,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d038da65d09f5db49bea54a5df905532, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dontDestroyOnLoad: []
+  Levels: []
+  levelIndex: 0
 --- !u!4 &1096914884
 Transform:
   m_ObjectHideFlags: 0

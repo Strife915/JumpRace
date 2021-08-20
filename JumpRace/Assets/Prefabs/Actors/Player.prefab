@@ -232,7 +232,7 @@ MonoBehaviour:
   crown: {fileID: 919132147616865880}
   speed: 15
   jump: 20
-  longJump: 50
+  longJump: 65
   rotationSpeed: 500
   dragging: 0
   isJumping: 0

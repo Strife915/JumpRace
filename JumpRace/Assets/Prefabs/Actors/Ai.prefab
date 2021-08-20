@@ -49,8 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myRigidBody: {fileID: 0}
   myAnimator: {fileID: 452589341}
-  jumpForce: 25
-  speed: 1
+  jumpForce: 35
+  speed: 1.2
   isJumping: 0
   isFinished: 0
   path: []

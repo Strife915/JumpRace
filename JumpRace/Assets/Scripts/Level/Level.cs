@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
-    private void Awake()
+    private void Start()
     {
         LevelLoader.instance.LoadLevel();
     }
